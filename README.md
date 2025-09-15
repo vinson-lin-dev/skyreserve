@@ -2,8 +2,13 @@
 
 This project is a **full-stack web application** simulating a real-world airline ticket reservation system. Customers can search for flights, purchase tickets, track spending, and view dashboards, while airline staff and booking agents manage flights, airplanes, airports, and revenue reporting.  
 
----
+## Quick Start
+Demo Login ()
+- Customer → customer@demo.com
+- Staff Operator (China Eastern) → operator@demo.com
+- Password: demo1234
 
+---
 
 ## Technical Stack
 
@@ -44,23 +49,11 @@ This project is a **full-stack web application** simulating a real-world airline
 
 ## Getting Started (Local Setup)
 
-### Prerequisites
-- Python 3.10+  
-- MySQL or XAMPP  
-- `pip` package manager  
-
 ### Clone the repository
 ```bash
 git clone https://github.com/your-username/airline-ticket-reservation.git
 cd airline-ticket-reservation
 ```
-
-<!-- # SkyReserve
-
-## Quick Start
-Test Accounts
-- Email: customer@gmail.com, bookingagent@gmail.com
-- Password: customer, bookingagent, 
 
 How To Run It On Your Own Computer
 1. Download XAMPP and start Apache and MySQL
@@ -68,14 +61,9 @@ How To Run It On Your Own Computer
 3. Download repository from github 
 4. Run the following commands in the terminal
 
+```bash
 python3 -m venv venv
 source .venv/bin/activate
 pip install -r requirements.txt
-python app.py (or python3 app.py) -->
-
-
-Demo logins (all demo1234):
-- Customer → customer@demo.com
-<!-- - Booking Agent → booking@demo.com -->
-<!-- - Staff Admin+Operator (American) → airlinestaff@demo.com -->
-- Staff Operator (China Eastern) → operator@demo.com
+python app.py (or python3 app.py)
+```
