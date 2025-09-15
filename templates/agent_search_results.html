@@ -17,7 +17,7 @@
                     <th>Arrival Date</th>
                     <th>Price</th>
                     <th>Status</th>
-                    <th>View Details</th>
+                    <!-- <th>View Details</th> -->
                     <th>Purchase</th>
                 </tr>
             </thead>
@@ -31,9 +31,9 @@
                     <td>{{ flight['arrival_time'] }}</td>
                     <td>${{ flight['price'] }}</td>
                     <td>{{ flight['status'] }}</td>
-                    <td>
+                    <!-- <td>
                         <a href="{{ url_for('flight_details', flight_num=flight['flight_num']) }}">View Details</a>
-                    </td>
+                    </td> -->
                     <td>
                         <form method="POST" action="{{ url_for('agent_purchase_ticket') }}">
                             <input type="hidden" name="flight_num" value="{{ flight['flight_num'] }}">

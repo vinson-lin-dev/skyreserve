@@ -504,7 +504,8 @@ def customer_dashboard():
         conn.close()
 
     return render_template('customer_dashboard.html', 
-                           user_name=user_name, user_email=user_email, customer_info=customer_info, 
+                           user_name=user_name, 
+                           user_email=user_email, customer_info=customer_info, 
                            upcoming_flights=upcoming_flights, booking_history=booking_history, 
                            departure_airports=departure_airports, arrival_airports=arrival_airports,
                            total_spent_last_six_months=total_spent_last_six_months,
@@ -631,7 +632,16 @@ def track_spending():
     return render_template('spending.html', months=months, spending=spending)
 
 # ------------------------------- Booking Agent -------------------------------
-@app.route('/booking_agent_dashboard', methods=['GET', 'POST'])
+def row_to_dict(row):
+    if row is None:
+        return {}
+    # sqlite3.Row -> dict; pass dicts through unchanged (MySQL)
+    try:
+        return row if isinstance(row, dict) else dict(row)
+    except Exception:
+        return {}
+
+@app.route('/booking_agent_dashboard', methods=['GET', 'POST'], endpoint='booking_agent_dashboard')
 @login_required
 def booking_agent_dashboard():
     user_email = session['user_email']
@@ -653,11 +663,12 @@ def booking_agent_dashboard():
         cursor.close(); conn.close()
         flash('Booking agent ID not found. Please contact support.', 'danger')
         return redirect(url_for('home'))
-    booking_agent_id = booking_agent['booking_agent_id']
+    booking_agent_id = (booking_agent['booking_agent_id']
+                        if isinstance(booking_agent, dict) else booking_agent['booking_agent_id'])
 
     thirty_days_ago_expr = sql_date_days_ago(30)
-    six_months_ago_expr = sql_date_months_ago(6)
-    one_year_ago_expr = sql_date_years_ago(1)
+    six_months_ago_expr  = sql_date_months_ago(6)
+    one_year_ago_expr    = sql_date_years_ago(1)
 
     try:
         cursor.execute("SELECT DISTINCT departure_airport FROM flight")
@@ -666,26 +677,25 @@ def booking_agent_dashboard():
         cursor.execute("SELECT DISTINCT arrival_airport FROM flight")
         arrival_airports = cursor.fetchall()
 
-        # Airline linked to agent
+        # Agent's airline
         q = "SELECT airline_name FROM booking_agent_work_for WHERE email = %s"
         if IS_SQLITE: q = _adapt_query_for_sqlite(q)
         cursor.execute(q, (user_email,))
         agent_airline = cursor.fetchone()
-
         if not agent_airline:
             flash('No airline association found for this booking agent.', 'danger')
             return redirect(url_for('home'))
+        airline_name = (agent_airline['airline_name']
+                        if isinstance(agent_airline, dict) else agent_airline['airline_name'])
 
-        airline_name = agent_airline['airline_name']
-
-        # Upcoming flights booked (for this airline)
+        # Upcoming flights (for this airline)
         q = """
             SELECT f.airline_name, f.flight_num, f.departure_time, f.arrival_time, 
                    f.departure_airport, f.arrival_airport, f.price, f.status, p.purchase_date, c.email AS customer_email
             FROM flight f
-            JOIN ticket t ON f.flight_num = t.flight_num AND f.airline_name = t.airline_name
+            JOIN ticket t   ON f.flight_num = t.flight_num AND f.airline_name = t.airline_name
             JOIN purchases p ON t.ticket_id = p.ticket_id
-            JOIN customer c ON p.customer_email = c.email
+            JOIN customer c  ON p.customer_email = c.email
             JOIN booking_agent b ON p.booking_agent_id = b.booking_agent_id
             WHERE f.status = 'upcoming' AND f.airline_name = %s AND p.booking_agent_id = b.booking_agent_id
         """
@@ -693,7 +703,7 @@ def booking_agent_dashboard():
         cursor.execute(q, (airline_name,))
         upcoming_flights = cursor.fetchall()
 
-        # Commission last 30 days
+        # ---- aggregates (use row_to_dict so SQLite rows behave like dicts)
         q = f"""
             SELECT 
                 SUM(f.price * 0.05) AS total_commission, 
@@ -706,12 +716,13 @@ def booking_agent_dashboard():
         """
         if IS_SQLITE: q = _adapt_query_for_sqlite(q)
         cursor.execute(q, (booking_agent_id,))
-        data = cursor.fetchone() or {}
-        total_commission = data.get('total_commission') or 0
-        total_tickets_sold = data.get('total_tickets_sold') or 0
-        avg_commission_per_ticket = round((data.get('avg_commission_per_ticket') or 0), 2)
+        agg = row_to_dict(cursor.fetchone())
 
-        # Custom range (optional)
+        total_commission = float(agg.get('total_commission') or 0)
+        total_tickets_sold = int(agg.get('total_tickets_sold') or 0)
+        avg_commission_per_ticket = round(float(agg.get('avg_commission_per_ticket') or 0), 2)
+
+        # Custom range
         custom_commission = 0
         custom_tickets_sold = 0
         custom_avg_commission = 0
@@ -719,9 +730,10 @@ def booking_agent_dashboard():
             start_date = request.form['start_date']
             end_date = request.form['end_date']
             q = """
-                SELECT SUM(f.price * 0.05) AS total_commission, 
-                       COUNT(p.ticket_id)   AS total_tickets_sold,
-                       AVG(f.price * 0.05)  AS avg_commission_per_ticket
+                SELECT 
+                    SUM(f.price * 0.05) AS total_commission, 
+                    COUNT(p.ticket_id)   AS total_tickets_sold,
+                    AVG(f.price * 0.05)  AS avg_commission_per_ticket
                 FROM purchases p
                 JOIN ticket t ON p.ticket_id = t.ticket_id
                 JOIN flight f ON t.flight_num = f.flight_num AND t.airline_name = f.airline_name
@@ -729,12 +741,12 @@ def booking_agent_dashboard():
             """
             if IS_SQLITE: q = _adapt_query_for_sqlite(q)
             cursor.execute(q, (booking_agent_id, start_date, end_date))
-            d = cursor.fetchone() or {}
-            custom_commission = d.get('total_commission') or 0
-            custom_tickets_sold = d.get('total_tickets_sold') or 0
-            custom_avg_commission = round((d.get('avg_commission_per_ticket') or 0), 2)
+            agg = row_to_dict(cursor.fetchone())
+            custom_commission = float(agg.get('total_commission') or 0)
+            custom_tickets_sold = int(agg.get('total_tickets_sold') or 0)
+            custom_avg_commission = round(float(agg.get('avg_commission_per_ticket') or 0), 2)
 
-        # Top 5 customers (6 months)
+        # Top customers
         q = f"""
             SELECT p.customer_email, COUNT(p.ticket_id) AS tickets_bought
             FROM purchases p
@@ -748,7 +760,6 @@ def booking_agent_dashboard():
         cursor.execute(q)
         top_5_customers_by_tickets = cursor.fetchall()
 
-        # Top 5 customers by commission (1 year)
         q = f"""
             SELECT p.customer_email, SUM(f.price * 0.05) AS commission_received
             FROM purchases p
@@ -770,8 +781,10 @@ def booking_agent_dashboard():
         cursor.close()
         conn.close()
 
-    return render_template('booking_agent_dashboard.html', upcoming_flights=upcoming_flights,
-                           departure_airports=departure_airports, arrival_airports=arrival_airports,
+    return render_template('booking_agent_dashboard.html',
+                           upcoming_flights=upcoming_flights,
+                           departure_airports=departure_airports,
+                           arrival_airports=arrival_airports,
                            total_commission=total_commission,
                            total_tickets_sold=total_tickets_sold,
                            avg_commission_per_ticket=avg_commission_per_ticket,
@@ -924,6 +937,57 @@ def agent_purchase_ticket():
         conn.close()
 
 # ------------------------------- Airline Staff -------------------------------
+@app.route('/add_booking_agent', methods=['GET', 'POST'])
+@login_required
+def add_booking_agent():
+    user_email = session['user_email']
+    role = session['role']
+
+    # Only airline staff with Admin permission
+    if role != 'airline_staff' or not check_admin_permissions(user_email):
+        flash('You do not have permission to access this page.', 'danger')
+        return redirect(url_for('home'))
+
+    if request.method == 'POST':
+        booking_agent_email = request.form['booking_agent_email']
+        conn = get_db_connection()
+        cursor = get_cursor(conn, dictionary=True)
+        try:
+            # already exists?
+            q = "SELECT 1 FROM booking_agent WHERE email = %s"
+            if IS_SQLITE: q = _adapt_query_for_sqlite(q)
+            cursor.execute(q, (booking_agent_email,))
+            if cursor.fetchone():
+                flash('This booking agent already exists.', 'danger')
+                cursor.close(); conn.close()
+                return redirect(url_for('add_booking_agent'))
+
+            # create agent with default password and random id
+            default_password = 'demo1234'
+            hashed_password = bcrypt.generate_password_hash(default_password).decode('utf-8')
+
+            q = "INSERT INTO booking_agent (email, password, booking_agent_id) VALUES (%s, %s, %s)"
+            if IS_SQLITE: q = _adapt_query_for_sqlite(q)
+            cursor.execute(q, (booking_agent_email, hashed_password, generate_booking_agent_id()))
+
+            # link to this staff's airline
+            airline_name = session['airline_name']
+            q = "INSERT INTO booking_agent_work_for (email, airline_name) VALUES (%s, %s)"
+            if IS_SQLITE: q = _adapt_query_for_sqlite(q)
+            cursor.execute(q, (booking_agent_email, airline_name))
+
+            conn.commit()
+            flash('Booking agent added successfully!', 'success')
+            return redirect(url_for('add_booking_agent'))
+        except Exception as e:
+            conn.rollback()
+            flash(f'Error adding booking agent: {e}', 'danger')
+            return redirect(url_for('add_booking_agent'))
+        finally:
+            cursor.close(); conn.close()
+
+    return render_template('add_booking_agent.html')
+
 def check_admin_permissions(user_email):
     conn = get_db_connection()
     cursor = get_cursor(conn, dictionary=True)

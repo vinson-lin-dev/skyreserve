@@ -70,7 +70,7 @@ body {
 
 .logo {
   height: 32px;
-  margin-left: 100px;
+  /* margin-left: 100px; */
 }
 
 .brand {
@@ -94,7 +94,7 @@ body {
 .navbar .right {
   display: flex;
   gap: 10px;
-  margin-right: 100px;
+  /* margin-right: 100px; */
 }
 
 /* Flash messages */
