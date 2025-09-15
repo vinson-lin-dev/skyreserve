@@ -1,0 +1,31 @@
+<!-- STAFF (ADMIN) CREATE FLIGHTS (DRAFT)-->
+ 
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Add New Flight</h1>
+<form method="POST">
+    <label for="flight_num">Flight Number:</label>
+    <input type="text" id="flight_num" name="flight_num" required><br>
+
+    <label for="airline_name">Airline Name:</label>
+    <input type="text" id="airline_name" name="airline_name" required><br>
+
+    <label for="departure_airport">Departure Airport:</label>
+    <input type="text" id="departure_airport" name="departure_airport" required><br>
+
+    <label for="arrival_airport">Arrival Airport:</label>
+    <input type="text" id="arrival_airport" name="arrival_airport" required><br>
+
+    <label for="departure_time">Departure Time:</label>
+    <input type="datetime-local" id="departure_time" name="departure_time" required><br>
+
+    <label for="arrival_time">Arrival Time:</label>
+    <input type="datetime-local" id="arrival_time" name="arrival_time" required><br>
+
+    <label for="price">Price:</label>
+    <input type="number" id="price" name="price" required><br>
+
+    <button type="submit">Add Flight</button>
+</form>
+{% endblock %}

@@ -1,0 +1,65 @@
+<!-- SIGNUP PAGE -->
+ 
+{% extends "base.html" %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <h2>Let's create your account</h2>
+        <form method="post" action="{{ url_for('signup') }}">
+            <div class="form-group">
+                <label for="role">Role:</label>
+                <select id="role" name="role" onchange="updateFormFields(this.value)" required>
+                    <option value="" disabled selected>Select your role</option>
+                    <option value="customer">Customer</option>
+                    <option value="booking_agent">Booking Agent</option>
+                    <option value="airline_staff">Airline Staff</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
+
+            <div id="role-specific-fields"></div>
+
+            <button type="submit">Sign Up</button>
+        </form>
+        <p>Already have an account? <a href="{{ url_for('login') }}">Log In</a></p>
+    </div>
+</div>
+
+<script>
+    function updateFormFields(role) {
+        const fields = document.getElementById('role-specific-fields');
+        fields.innerHTML = '';
+        if (role === 'customer') {
+            fields.innerHTML = `
+                <input type="text" name="name" placeholder="Name" required>
+                <input type="text" name="building_number" placeholder="Building Number" required>
+                <input type="text" name="street" placeholder="Street" required>
+                <input type="text" name="city" placeholder="City" required>
+                <input type="text" name="state" placeholder="State" required>
+                <input type="text" name="phone_number" placeholder="Phone Number" required>
+                <input type="text" name="passport_number" placeholder="Passport Number" required>
+                <input type="text" name="passport_country" placeholder="Passport Country" required>
+                <label for="passport_expiration">Passport Expiration Date</label>
+                <input type="date" name="passport_expiration" required>
+                <label for="date_of_birth">Date of Birth</label>
+                <input type="date" name="date_of_birth" required>
+            `;
+        } else if (role === 'booking_agent') {
+            fields.innerHTML = `<input type="number" name="booking_agent_id" placeholder="Booking Agent ID" required>`;
+        } else if (role === 'airline_staff') {
+            fields.innerHTML = `
+                <input type="text" name="first_name" placeholder="First Name" required>
+                <input type="text" name="last_name" placeholder="Last Name" required>
+                <label for="date_of_birth">Date of Birth</label>
+                <input type="date" name="date_of_birth" required>
+                <input type="text" name="airline_name" placeholder="Airline Name" required>
+            `;
+        }
+    }
+</script>
+{% endblock %}

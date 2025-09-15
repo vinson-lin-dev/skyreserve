@@ -1,0 +1,31 @@
+<!-- STAFF (ADMIN) LIST ALL AIRLINES IN THE ADMIN'S AIRLINE COMPANY -->
+ 
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Airplanes for {{ session['airline_name'] }}</h1>
+
+    {% if airplanes %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Airplane ID</th>
+                    <th>Number of Seats</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for airplane in airplanes %}
+                    <tr>
+                        <td>{{ airplane['airplane_id'] }}</td>
+                        <td>{{ airplane['seats'] }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No airplanes found for this airline.</p>
+    {% endif %}
+
+    <br>
+    <a href="{{ url_for('airline_staff_dashboard') }}">Back to Dashboard</a>
+{% endblock %}

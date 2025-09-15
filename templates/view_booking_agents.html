@@ -1,0 +1,76 @@
+<!-- STAFF VIEW TOP BOOKING AGENTS -->
+ 
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>View Booking Agents</h1>
+
+    <h2>Top 5 Booking Agents by Tickets Sold (Last Month)</h2>
+    {% if top_agents_by_sales_month %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Booking Agent Email</th>
+                    <th>Tickets Sold</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for agent in top_agents_by_sales_month %}
+                    <tr>
+                        <td>{{ agent.email }}</td>
+                        <td>{{ agent.tickets_sold }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No agents found.</p>
+    {% endif %}
+
+    <h2>Top 5 Booking Agents by Tickets Sold (Last Year)</h2>
+    {% if top_agents_by_sales_year %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Booking Agent Email</th>
+                    <th>Tickets Sold</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for agent in top_agents_by_sales_year %}
+                    <tr>
+                        <td>{{ agent.email }}</td>
+                        <td>{{ agent.tickets_sold }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No agents found.</p>
+    {% endif %}
+
+    <h2>Top 5 Booking Agents by Commission Earned (Last Year)</h2>
+    {% if top_agents_by_commission %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Booking Agent Email</th>
+                    <th>Commission Earned</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for agent in top_agents_by_commission %}
+                    <tr>
+                        <td>{{ agent.email }}</td>
+                        <td>${{ agent.commission_received }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No agents found.</p>
+    {% endif %}
+
+    <br>
+    <a href="{{ url_for('airline_staff_dashboard') }}">Back to Dashboard</a>
+{% endblock %}

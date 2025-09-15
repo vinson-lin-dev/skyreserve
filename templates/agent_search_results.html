@@ -1,0 +1,54 @@
+<!-- BOOKING AGENT: SEARCH FOR TICKET TO BUY -->
+
+{% extends "base.html" %}
+
+{% block content %}
+    <div>
+        <h1>Search Results</h1>
+        
+        {% if flights %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Flight Number</th>
+                    <th>Departure Airport</th>
+                    <th>Arrival Airport</th>
+                    <th>Departure Date</th>
+                    <th>Arrival Date</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>View Details</th>
+                    <th>Purchase</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for flight in flights %}
+                <tr>
+                    <td>{{ flight['flight_num'] }}</td>
+                    <td>{{ flight['departure_airport'] }}</td>
+                    <td>{{ flight['arrival_airport'] }}</td>
+                    <td>{{ flight['departure_time'] }}</td>
+                    <td>{{ flight['arrival_time'] }}</td>
+                    <td>${{ flight['price'] }}</td>
+                    <td>{{ flight['status'] }}</td>
+                    <td>
+                        <a href="{{ url_for('flight_details', flight_num=flight['flight_num']) }}">View Details</a>
+                    </td>
+                    <td>
+                        <form method="POST" action="{{ url_for('agent_purchase_ticket') }}">
+                            <input type="hidden" name="flight_num" value="{{ flight['flight_num'] }}">
+                            <!-- New input for customer_email -->
+                            <label for="customer_email_{{ flight['flight_num'] }}">Customer Email</label>
+                            <input type="email" id="customer_email_{{ flight['flight_num'] }}" name="customer_email" required placeholder="Enter customer's email" />
+                            <button type="submit" class="btn purchase-btn-adjust">Agent Buy</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No flights found for the given criteria.</p>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -1,0 +1,134 @@
+<!-- TEMPLATE ALL OTHER HTML FILES INHERIT FROM -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyReserve</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div class="navbar">
+        <div class="navbar-left">
+            <img src="{{ url_for('static', filename='images/wing.png') }}" alt="logo" class="logo">
+            <a href="{{ url_for('home') }}" class="nav-link">
+                <h2 class="brand">SKYRESERVE</h2>
+            </a>
+            <a href="{{ url_for('home') }}" class="nav-link">Search Flights</a>
+        </div>
+        <div class="right">
+            {% if 'user_email' in session %}
+                <div class="nav-item">
+                    <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link" href="{{ url_for('profile') }}">Profile</a>
+                </div>
+            {% else %}
+                <div class="nav-item">
+                    <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link" href="{{ url_for('signup') }}">Sign Up</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <main class="content">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+
+<footer class="footer">
+    <div class="footer-inner">
+        <span>© SkyReserve</span>
+        <nav class="footer-links">
+            <a href="{{ url_for('home') }}">About Us</a>
+            <a href="{{ url_for('home') }}">Help</a>
+        </nav>
+    </div>
+</footer>
+
+<script>
+    (function () {
+        // For every progressive table on the page:
+        document.querySelectorAll('table.progressive-table').forEach(function (table) {
+            const chunk = parseInt(table.getAttribute('data-chunk') || '3', 10);
+            const rows = Array.from(table.querySelectorAll('tbody tr'));
+            if (rows.length <= chunk) return;
+
+            // Hide everything after the first chunk
+            rows.forEach((tr, i) => tr.style.display = (i < chunk) ? 'table-row' : 'none');
+            let visibleCount = chunk;
+
+            // Find or create a controls container just after the table
+            let controls = table.nextElementSibling;
+            if (!controls || !controls.classList.contains('table-controls')) {
+                controls = document.createElement('div');
+                controls.className = 'table-controls';
+                table.insertAdjacentElement('afterend', controls);
+            }
+
+            // Create buttons
+            const moreBtn = document.createElement('button');
+            moreBtn.className = 'show-more-btn';
+            moreBtn.textContent = 'Show more';
+            moreBtn.setAttribute('aria-expanded', 'false');
+
+            const lessBtn = document.createElement('button');
+            lessBtn.className = 'show-more-btn';
+            lessBtn.textContent = 'Show less';
+            lessBtn.style.display = 'none';
+
+            controls.appendChild(moreBtn);
+            controls.appendChild(lessBtn);
+
+            // Handlers
+            moreBtn.addEventListener('click', function () {
+                const nextCount = Math.min(visibleCount + chunk, rows.length);
+                rows.slice(visibleCount, nextCount).forEach(tr => tr.style.display = 'table-row');
+                visibleCount = nextCount;
+
+                // After first expand, show the "less" button
+                if (visibleCount > chunk) lessBtn.style.display = 'inline-block';
+
+                // Hide "more" when everything is visible
+                if (visibleCount >= rows.length) moreBtn.style.display = 'none';
+
+                moreBtn.setAttribute('aria-expanded', String(visibleCount > chunk));
+            });
+
+            lessBtn.addEventListener('click', function () {
+                // Collapse back to first chunk
+                rows.forEach((tr, i) => tr.style.display = (i < chunk) ? 'table-row' : 'none');
+                visibleCount = chunk;
+
+                // Reset buttons
+                moreBtn.style.display = 'inline-block';
+                lessBtn.style.display = 'none';
+                moreBtn.setAttribute('aria-expanded', 'false');
+
+                // Scroll the table back into view (nice UX)
+                table.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+    })();
+</script>
+
+</html>

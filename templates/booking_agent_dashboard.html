@@ -1,0 +1,181 @@
+<!-- BOOKING AGENT DASHBOARD -->
+ 
+{% extends "base.html" %}
+
+{% block content %}
+    <div>
+        <h1 class="section-header">Booking Agent Dashboard</h1>
+
+        <h2 class="section-header">Upcoming Flights</h2>
+        {% if upcoming_flights %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Flight Number</th>
+                        <th>Departure Airport</th>
+                        <th>Arrival Airport</th>
+                        <th>Departure Date</th>
+                        <th>Arrival Date</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                        <!-- <th>Action</th> -->
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for flight in upcoming_flights %}
+                    <tr>
+                        <td>{{ flight['flight_num'] }}</td>
+                        <td>{{ flight['departure_airport'] }}</td>
+                        <td>{{ flight['arrival_airport'] }}</td>
+                        <td>{{ flight['departure_time'] }}</td>
+                        <td>{{ flight['arrival_time'] }}</td>
+                        <td>${{ flight['price'] }}</td>
+                        <td>{{ flight['status'] }}</td>
+                        <!-- <td>
+                            <form method="POST" action="{{ url_for('purchase_ticket') }}">
+                                <input type="hidden" name="flight_num" value="{{ flight['flight_num'] }}">
+                                <button type="submit" class="btn purchase-btn">Purchase</button>
+                            </form>
+                        </td> -->
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No flights available for your airline.</p>
+        {% endif %}
+
+        <h2 class="section-header">Search Flights</h2>
+        <div class="search-flights">
+            <h3>Search for a New Flight</h3>
+            <form action="{{ url_for('agent_search_flights') }}" method="POST">
+                <label for="source">Departure Airport:</label>
+                <input type="text" id="source" name="source" list="departure_airports" placeholder="Departure Airport" required>
+
+                <label for="destination">Arrival Airport:</label>
+                <input type="text" id="destination" name="destination" list="arrival_airports" placeholder="Arrival Airport" required>
+
+                <label for="date">Date:</label>
+                <input type="date" id="date" name="date" required>
+
+                <!-- <label for="customer">Customer Email:</label>
+                <input type="email" id="customer" name="customer" placeholder="Customer Email" required> -->
+
+                <button type="submit">Search</button>
+            </form>
+        </div>
+
+        <datalist id="departure_airports">
+            {% for airport in departure_airports %}
+            <option value="{{ airport['departure_airport'] }}">
+            {% endfor %}
+        </datalist>
+        
+        <datalist id="arrival_airports">
+            {% for airport in arrival_airports %}
+            <option value="{{ airport['arrival_airport'] }}">
+            {% endfor %}
+        </datalist>
+
+        <h2 class="section-header">Commission</h2>
+        <form method="POST" action="{{ url_for('booking_agent_dashboard') }}">
+            <label for="start_date">Start Date:</label>
+            <input type="date" id="start_date" name="start_date" required>
+            
+            <label for="end_date">End Date:</label>
+            <input type="date" id="end_date" name="end_date" required>
+            
+            <button type="submit">View</button>
+        </form>
+        
+        <h3>Commission Details</h3>
+        <p>Total Commission (Last 30 Days): ${{ total_commission }}</p>
+        <p>Total Tickets Sold (Last 30 Days): {{ total_tickets_sold }}</p>
+        <p>Average Commission per Ticket (Last 30 Days): ${{ avg_commission_per_ticket }}</p>
+        
+        {% if total_commission != 0 %}
+            <h4>Custom Date Range Results</h4>
+            <!-- <p>Total Commission: ${{ total_commission }}</p>
+            <p>Total Tickets Sold: {{ total_tickets_sold }}</p>
+            <p>Average Commission per Ticket: ${{ avg_commission_per_ticket }}</p> -->
+            <p>Total Commission (Custom Date Range): ${{ custom_commission }}</p>
+            <p>Total Tickets Sold (Custom Date Range): {{ custom_tickets_sold }}</p>
+            <p>Average Commission per Ticket (Custom Date Range): ${{ custom_avg_commission }}</p>
+        {% endif %}
+
+<!-- top customers -->
+
+        <h2 class="section-header">Top Customers</h2>
+        <h3>Top 5 Customers by Number of Tickets Bought (Last 6 Months)</h3>
+        <canvas id="ticketsBoughtChart" width="300" height="100"></canvas>
+        <h3>Top 5 Customers by Commission Received (Last Year)</h3>
+        <canvas id="commissionReceivedChart" width="300" height="100"></canvas>
+        <script>
+            // Bar Chart for Top 5 Customers by Tickets Bought
+            var ctxTicketsBought = document.getElementById('ticketsBoughtChart').getContext('2d');
+            var ticketsBoughtChart = new Chart(ctxTicketsBought, {
+                type: 'bar',
+                data: {
+                    labels: [
+                        {% for customer in top_5_customers_by_tickets %}
+                            "{{ customer['customer_email'] }}", {% if not loop.last %},{% endif %}
+                        {% endfor %}
+                    ],
+                    datasets: [{
+                        label: 'Number of Tickets Bought (Last 6 Months)',
+                        data: [
+                            {% for customer in top_5_customers_by_tickets %}
+                                {{ customer['tickets_bought'] }},
+                                {% if not loop.last %},{% endif %}
+                            {% endfor %}
+                        ],
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    responsive: true
+                }
+            });
+        
+            // Bar Chart for Top 5 Customers by Commission Received
+            var ctxCommissionReceived = document.getElementById('commissionReceivedChart').getContext('2d');
+            var commissionReceivedChart = new Chart(ctxCommissionReceived, {
+                type: 'bar',
+                data: {
+                    labels: [
+                        {% for customer in top_5_customers_by_commission %}
+                            "{{ customer['customer_email'] }}", {% if not loop.last %},{% endif %}
+                        {% endfor %}
+                    ],
+                    datasets: [{
+                        label: 'Commission Received (Last Year)',
+                        data: [
+                            {% for customer in top_5_customers_by_commission %}
+                                {{ customer['commission_received'] }},
+                                {% if not loop.last %},{% endif %}
+                            {% endfor %}
+                        ],
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    responsive: true
+                }
+            });
+        </script>        
+    </div>
+{% endblock %}

@@ -1,0 +1,20 @@
+<!-- STAFF (ADMIN): ADD NEW BOOKING AGENT -->
+ 
+{% extends "base.html" %}
+
+{% block content %}
+    <div>
+        <h1>Add New Booking Agent</h1>
+
+        <!-- Form for adding booking agent -->
+        <form method="POST">
+            <label for="booking_agent_email">Booking Agent Email:</label>
+            <input type="email" name="booking_agent_email" placeholder="Enter the email of the new booking agent" required><br>
+
+            <button type="submit">Add Booking Agent</button>
+        </form>
+
+        <br>
+        <a href="{{ url_for('airline_staff_dashboard') }}">Back to Dashboard</a>
+    </div>
+{% endblock %}

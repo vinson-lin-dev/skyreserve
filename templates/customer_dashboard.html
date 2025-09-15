@@ -1,0 +1,234 @@
+<!-- CUSTOMER DASHBOARD -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="section-header">Welcome {{ user_name or user_email }}!</h2>
+
+<!-- Upcoming Flights -->
+<div class="upcoming-flights">
+    <h3 class="section-header">Your Upcoming Flights</h3>
+    {% if upcoming_flights %}
+        <table class="progressive-table" data-chunk="3">
+            <thead>
+                    <tr>
+                        <th>Airline Name</th>
+                        <th>Flight Number</th>
+                        <th>Departure Airport</th>
+                        <th>Departure Time</th>
+                        <th>Arrival Airport</th>
+                        <th>Arrival Time</th>
+                        <th>Status</th>
+                        <!-- <th>Price</th> -->
+                    </tr>
+            </thead>
+            <tbody>
+                {% for flight in upcoming_flights %}
+                <tr>
+                    <td>{{ flight['airline_name'] }}</td>
+                    <td>{{ flight['flight_num'] }}</td>
+                    <td>{{ flight['departure_airport'] }}</td>
+                    <td>{{ flight['departure_time'] }}</td>
+                    <td>{{ flight['arrival_airport'] }}</td>
+                    <td>{{ flight['arrival_time'] }}</td>
+                    <td>{{ flight['status'] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% if upcoming_flights|length > 3 %}
+            <div class="table-controls"></div>
+        {% endif %}
+    {% else %}
+        <p>You have no upcoming flights.</p>
+    {% endif %}
+
+<datalist id="departure_airports">
+    {% for airport in departure_airports %}
+    <option value="{{ airport['departure_airport'] }}">
+    {% endfor %}
+</datalist>
+
+<datalist id="arrival_airports">
+    {% for airport in arrival_airports %}
+    <option value="{{ airport['arrival_airport'] }}">
+    {% endfor %}
+</datalist>
+
+<!-- Booking History -->
+<div class="booking-history">
+    <h3 class="section-header">Your Booking History</h3>
+    {% if booking_history %}
+    <table class="progressive-table" data-chunk="3">
+        <thead>
+            <tr>
+                <th>Purchase Date</th>
+                <th>Airline Name</th>
+                <th>Flight Number</th>
+                <th>Departure Airport</th>
+                <th>Arrival Airport</th>
+                <th>Status</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in booking_history %}
+            <tr>
+                <td>{{ booking['purchase_date'] }}</td>
+                <td>{{ booking['airline_name'] }}</td>
+                <td>{{ booking['flight_num'] }}</td>
+                <td>{{ booking['departure_airport'] }}</td>
+                <td>{{ booking['arrival_airport'] }}</td>
+                <td>{{ booking['status'] }}</td>
+                <td>{{ booking['price'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% if booking_history|length > 3 %}
+    <div class="table-controls"></div>
+    {% endif %}
+    {% else %}
+    <p>You have no past bookings.</p>
+    {% endif %}
+</div>
+
+<!-- Spending Tracker -->
+<div class="spending-tracker">
+    <h3 class="section-header">Your Spending</h3>
+
+    <div class="chart-row">
+        <div class="chart-box">
+            <div>
+                <!-- <h4>Total Spending in the Last Year: ${{ total_spent_last_year if total_spent_last_year else 0 }}</h4> -->
+                <!-- <h4>Total Spending in the Last 6 Months: ${{ total_spent_last_six_months if total_spent_last_six_months else 0 }}</h4> -->
+                <h4 id="totalSpendingLast6Months">Total Spending (Last 5 Months): ${{ total_spent_last_six_months if total_spent_last_six_months else 0 }}</h4>
+            </div>
+            <!-- Bar Chart for Last 6 Months Spending -->
+            <canvas id="spendingLast6Months" width="300"></canvas>
+        </div>
+
+        <div class="chart-box">
+            <h4>Total Spending Over Selected Time</h4>
+            <p id="totalSpendingDisplay"></p>
+            <div>
+                <form method="POST" action="/customer_dashboard">
+                    <label for="start_date">Start Date:</label>
+                    <input type="date" name="start_date" required>
+                    <label for="end_date">End Date:</label>
+                    <input type="date" name="end_date" required>
+                    <button type="submit">Show Spending</button>
+                </form>
+            </div>
+            <!-- Bar Chart for Selected Date Range Spending -->
+            <canvas id="spendingChart" width="300" height="100"></canvas>
+            <!-- Display Total Spending for Selected Date Range -->
+        </div>
+    </div>
+
+    <script>
+        // Format the total spending value in the last 6 months with commas
+        var totalSpendingLast6MonthsElement = document.getElementById('totalSpendingLast6Months');
+        var totalSpentLast6Months = {{ total_spent_last_six_months if total_spent_last_six_months else 0 }};
+        var formattedTotalSpentLast6Months = totalSpentLast6Months.toLocaleString(); // Add commas for thousands separator
+        totalSpendingLast6MonthsElement.innerHTML = `Total Spending in the Last 6 Months: $${formattedTotalSpentLast6Months}`;
+
+        // Bar Chart For Spending In Last 6 Months
+        var ctxLast6Months = document.getElementById('spendingLast6Months').getContext('2d');
+        var spendingLast6MonthsChart = new Chart(ctxLast6Months, {
+            type: 'bar',
+            data: {
+                labels: [
+                    {% for entry in last_six_months_spending %}
+                        "{{ entry['month'] }}",{% if not loop.last %},{% endif %}
+                    {% endfor %}
+                ],
+                datasets: [{
+                    label: 'Spending in Last 6 Months',
+                    data: [
+                        {% for entry in last_six_months_spending %}
+                            {{ entry['total_spent'] or 0 }},
+                            {% if not loop.last %},{% endif %}
+                        {% endfor %}
+                    ],
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                    barPercentage: 0.95,
+                    categoryPercentage: 0.95
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: { 
+                        ticks: { autoSkip: false, maxTicksLimit: 6 }, 
+                        grid: { display: false }
+                    },
+                    y: { 
+                        beginAtZero: true, 
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+        
+        // Display Total Spending for Selected Date Range
+        var totalSpendingElement = document.getElementById('totalSpendingDisplay');
+        var formattedTotalSpent = {{ total_spent_range }}.toLocaleString(); 
+        // totalSpendingElement.innerHTML = `Total Spending (from {{ start_date }} to {{ end_date }}): ${{ total_spent_range }}`;
+        totalSpendingElement.innerHTML = `From {{ start_date }} to {{ end_date }}: $${formattedTotalSpent}`;
+
+        // Bar Chart For Spending Over Time Range
+        var ctxSelectedRange = document.getElementById('spendingChart').getContext('2d');
+        var spendingChart = new Chart(ctxSelectedRange, {
+            type: 'bar',
+            data: {
+                labels: [
+                    {% for entry in monthly_spending %}
+                        "{{ entry['month'] }}", {% if not loop.last %},{% endif %}
+                    {% endfor %}
+                ],
+                datasets: [{
+                    label: 'Amount Spent',
+                    data: [
+                        {% for entry in monthly_spending %}
+                            {{ entry['total_spent'] }},
+                            {% if not loop.last %},{% endif %}
+                        {% endfor %}
+                    ],
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                    barPercentage: 1,
+                    categoryPercentage: 0.95
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        // ticks: { autoSkip: false, maxTicksLimit: 12 }
+                        grid: { display: false }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+
+    </script>
+    
+</div>
+
+{% endblock %}

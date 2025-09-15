@@ -1,0 +1,61 @@
+<!-- STAFF VIEW TOP DESTINATIONS -->
+
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Top Destinations</h1>
+
+    <!-- Last 3 Months Top Destinations -->
+    <h3>Top 3 Destinations (Last 3 Months)</h3>
+    {% if top_destinations_last_3_months %}
+        <table>
+            <thead>
+                <tr>
+                    <th>City</th>
+                    <th>Airport</th>
+                    <th>Number of Flights</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for destination in top_destinations_last_3_months %}
+                    <tr>
+                        <td>{{ destination.airport_city }}</td>
+                        <td>{{ destination.arrival_airport }}</td>
+                        <td>{{ destination.num_flights }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No data available for the last 3 months.</p>
+    {% endif %}
+
+    <br>
+
+    <!-- Last Year Top Destinations -->
+    <h3>Top 3 Destinations (Last Year)</h3>
+    {% if top_destinations_last_year %}
+        <table>
+            <thead>
+                <tr>
+                    <th>City</th>
+                    <th>Airport</th>
+                    <th>Number of Flights</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for destination in top_destinations_last_year %}
+                    <tr>
+                        <td>{{ destination.airport_city }}</td>
+                        <td>{{ destination.arrival_airport }}</td>
+                        <td>{{ destination.num_flights }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No data available for the last year.</p>
+    {% endif %}
+    <br>
+    <a href="{{ url_for('airline_staff_dashboard') }}">Back to Dashboard</a>
+{% endblock %}

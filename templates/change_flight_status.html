@@ -1,0 +1,21 @@
+<!-- STAFF (OPERATOR) CHANGE FLIGHT STATUS -->
+ 
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Change Status for Flight {{ flight['flight_num'] }}</h2>
+    
+    <form method="POST">
+        <label for="status">Flight Status:</label>
+        <select name="status" required>
+            <option value="upcoming" {% if flight['status'] == 'upcoming' %}selected{% endif %}>Upcoming</option>
+            <option value="in progress" {% if flight['status'] == 'in progress' %}selected{% endif %}>In Progress</option>
+            <option value="delayed" {% if flight['status'] == 'delayed' %}selected{% endif %}>Delayed</option>
+            <option value="completed" {% if flight['status'] == 'completed' %}selected{% endif %}>Completed</option>
+            <option value="cancelled" {% if flight['status'] == 'cancelled' %}selected{% endif %}>Cancelled</option>
+        </select>
+        
+        <button type="submit">Update Status</button>
+    </form>
+
+{% endblock %}

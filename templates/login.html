@@ -1,0 +1,31 @@
+<!-- LOGIN PAGE -->
+ 
+{% extends "base.html" %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <h2>Log in to your account</h2>
+        <form method="post" action="{{ url_for('login') }}">
+            <div class="form-group">
+                <label for="role">Role:</label>
+                <select id="role" name="role" required>
+                    <!-- <option value="" disabled selected>Select your role</option> -->
+                    <option value="" disabled>Select your role</option>
+                    <option value="customer" selected>Customer</option>
+                    <option value="booking_agent">Booking Agent</option>
+                    <option value="airline_staff">Airline Staff</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
+
+            <button type="submit">Log In</button>
+        </form>
+        <p class="homepage-margin">Don't have an account? <a href="{{ url_for('signup') }}">Sign Up</a></p>
+    </div>
+</div>
+{% endblock %}

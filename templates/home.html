@@ -1,0 +1,65 @@
+<!-- GUEST INTERFACE -->
+
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Search Form -->
+<h2>Search for Flights</h2>
+<form action="{{ url_for('search_flights') }}" method="GET">
+    <!-- <label for="source">Departure Airport:</label> -->
+    <input type="text" id="source" name="source" list="departure_airports" placeholder="Departure Airport" required>
+
+    <!-- <label for="destination">Arrival Airport:</label> -->
+    <input type="text" id="destination" name="destination" list="arrival_airports" placeholder="Arrival Airport"
+        required>
+
+    <!-- <label for="date">Date:</label> -->
+    <input type="date" id="date" name="date" required>
+
+    <button type="submit">Search Flights</button>
+</form>
+
+<datalist id="departure_airports">
+    {% for airport in departure_airports %}
+    <option value="{{ airport['departure_airport'] }}">
+        {% endfor %}
+</datalist>
+
+<datalist id="arrival_airports">
+    {% for airport in arrival_airports %}
+    <option value="{{ airport['arrival_airport'] }}">
+        {% endfor %}
+</datalist>
+
+<br>
+
+<h2>Suggested Flights</h2>
+<table class="progressive-table" data-chunk="5">
+    <thead>
+        <tr>
+            <th>Flight Number</th>
+            <th>Departure Airport</th>
+            <th>Arrival Airport</th>
+            <th>Departure Date</th>
+            <th>Arrival Date</th>
+            <th>Price</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for flight in flights %}
+        <tr>
+            <td>{{ flight['flight_num'] }}</td>
+            <td>{{ flight['departure_airport'] }}</td>
+            <td>{{ flight['arrival_airport'] }}</td>
+            <td>{{ flight['departure_time'] }}</td>
+            <td>{{ flight['arrival_time'] }}</td>
+            <td>${{ flight['price'] }}</td>
+            <td>{{ flight['status'] }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% if flights|length > 5 %}
+{% endif %}
+{% endblock %}

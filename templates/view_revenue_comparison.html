@@ -1,0 +1,67 @@
+<!-- STAFF VIEW ON (IN)DIRECT REVENUE -->
+
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Revenue Comparison</h1>
+
+    <!-- Revenue Display -->
+    <h3>Revenue Breakdown</h3>
+    <p><strong>Direct Sales (Last Month):</strong> ${{ direct_revenue_last_month }}</p>
+    <p><strong>Indirect Sales (Last Month):</strong> ${{ indirect_revenue_last_month }}</p>
+    <p><strong>Direct Sales (Last Year):</strong> ${{ direct_revenue_last_year }}</p>
+    <p><strong>Indirect Sales (Last Year):</strong> ${{ indirect_revenue_last_year }}</p>
+
+    <!-- Pie Charts for Revenue Comparison -->
+    <h3>Revenue Comparison (Direct vs Indirect)</h3>
+
+    <!-- Pie Chart for Last Month -->
+    <h4>Last Month</h4>
+    <canvas id="revenueChartLastMonth" width="400" height="200"></canvas>
+
+    <!-- Pie Chart for Last Year -->
+    <h4>Last Year</h4>
+    <canvas id="revenueChartLastYear" width="400" height="200"></canvas>
+
+    <script>
+        // Pie Chart for Revenue Comparison Last Month
+        var ctxLastMonth = document.getElementById('revenueChartLastMonth').getContext('2d');
+        var revenueChartLastMonth = new Chart(ctxLastMonth, {
+            type: 'pie',
+            data: {
+                labels: ['Direct Sales', 'Indirect Sales'],
+                datasets: [{
+                    label: 'Revenue Comparison (Last Month)',
+                    data: [{{ direct_revenue_last_month }}, {{ indirect_revenue_last_month }}],
+                    backgroundColor: ['rgba(54, 162, 235, 0.2)', 'rgba(75, 192, 192, 0.2)'],
+                    borderColor: ['rgba(54, 162, 235, 1)', 'rgba(75, 192, 192, 1)'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+
+        // Pie Chart for Revenue Comparison Last Year
+        var ctxLastYear = document.getElementById('revenueChartLastYear').getContext('2d');
+        var revenueChartLastYear = new Chart(ctxLastYear, {
+            type: 'pie',
+            data: {
+                labels: ['Direct Sales', 'Indirect Sales'],
+                datasets: [{
+                    label: 'Revenue Comparison (Last Year)',
+                    data: [{{ direct_revenue_last_year }}, {{ indirect_revenue_last_year }}],
+                    backgroundColor: ['rgba(54, 162, 235, 0.2)', 'rgba(75, 192, 192, 0.2)'],
+                    borderColor: ['rgba(54, 162, 235, 1)', 'rgba(75, 192, 192, 1)'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+    </script>
+    <br>
+    <a href="{{ url_for('airline_staff_dashboard') }}">Back to Dashboard</a>
+{% endblock %}

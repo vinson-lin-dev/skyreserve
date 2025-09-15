@@ -1,0 +1,63 @@
+<!-- STAFF VIEW TOP CUSTOMERS -->
+
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Frequent Customers</h1>
+    
+    <h3>Top Frequent Customers (Last Year)</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Customer Name</th>
+                <th>Email</th>
+                <th>Number of Tickets Purchased</th>
+                <th>View Flight History</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer in frequent_customers %}
+                <tr>
+                    <td>{{ customer.name }}</td>
+                    <td>{{ customer.email }}</td>
+                    <td>{{ customer.num_tickets }}</td>
+                    <td>
+                        <form method="POST" action="{{ url_for('view_frequent_customers') }}">
+                            <input type="hidden" name="customer_email" value="{{ customer.email }}">
+                            <button type="submit">View Flights</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    {% if selected_customer %}
+        <h3>Flights Taken by {{ selected_customer.name }} ({{ selected_customer.email }})</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Flight Number</th>
+                    <th>Departure Time</th>
+                    <th>Arrival Time</th>
+                    <th>Departure Airport</th>
+                    <th>Arrival Airport</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for flight in customer_flights %}
+                    <tr>
+                        <td>{{ flight.flight_num }}</td>
+                        <td>{{ flight.departure_time }}</td>
+                        <td>{{ flight.arrival_time }}</td>
+                        <td>{{ flight.departure_airport }}</td>
+                        <td>{{ flight.arrival_airport }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+    
+    <br>
+    <a href="{{ url_for('airline_staff_dashboard') }}">Back to Dashboard</a>
+{% endblock %}

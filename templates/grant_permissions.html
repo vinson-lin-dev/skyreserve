@@ -1,0 +1,30 @@
+<!-- STAFF (ADMIN) GRANT OTHERS DIFF TYPES OF PERMISSION -->
+ 
+{% extends "base.html" %}
+
+{% block content %}
+    <div>
+        <h1>Grant New Permissions</h1>
+
+        <!-- Form for granting permissions -->
+        <form method="POST">
+            <label for="staff_username">Staff Username:</label>
+            <select name="staff_username" required>
+                {% for staff in staff_members %}
+                    <option value="{{ staff.username }}">{{ staff.first_name }} {{ staff.last_name }} ({{ staff.username }})</option>
+                {% endfor %}
+            </select><br>
+
+            <label for="new_permission">Permission Type:</label>
+            <select name="new_permission" required>
+                <option value="Operator">Operator</option>
+                <option value="Admin">Admin</option>
+            </select><br>
+
+            <button type="submit">Grant Permission</button>
+        </form>
+
+        <br>
+        <a href="{{ url_for('airline_staff_dashboard') }}">Back to Dashboard</a>
+    </div>
+{% endblock %}

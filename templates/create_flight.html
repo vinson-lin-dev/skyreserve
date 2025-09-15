@@ -1,0 +1,56 @@
+<!-- STAFF (ADMIN) CREATE FLIGHTS-->
+ 
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Create a New Flight</h2>
+
+    <form method="POST">
+        <label for="flight_num">Flight Number:</label>
+        <input type="text" id="flight_num" name="flight_num" required>
+
+        <label for="departure_airport">Departure Airport:</label>
+        <select id="departure_airport" name="departure_airport" required>
+            {% for airport in airports %}
+                <option value="{{ airport['airport_name'] }}">{{ airport['airport_name'] }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="arrival_airport">Arrival Airport:</label>
+        <select id="arrival_airport" name="arrival_airport" required>
+            {% for airport in airports %}
+                <option value="{{ airport['airport_name'] }}">{{ airport['airport_name'] }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="departure_time">Departure Time:</label>
+        <input type="datetime-local" id="departure_time" name="departure_time" required>
+
+        <label for="arrival_time">Arrival Time:</label>
+        <input type="datetime-local" id="arrival_time" name="arrival_time" required>
+
+        <label for="price">Price:</label>
+        <input type="number" id="price" name="price" required>
+
+        <label for="status">Status:</label>
+        <select id="status" name="status" required>
+            <option value="upcoming">Upcoming</option>
+            <option value="in progress">In Progress</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+        </select>
+
+        <label for="airplane_id">Airplane ID:</label>
+        <select id="airplane_id" name="airplane_id" required>
+            {% for airplane in airplanes %}
+                <option value="{{ airplane['airplane_id'] }}">{{ airplane['airplane_id'] }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Create Flight</button>
+    </form>
+
+    <br>
+    <a href="{{ url_for('airline_staff_dashboard') }}">Back to Dashboard</a>
+
+{% endblock %}

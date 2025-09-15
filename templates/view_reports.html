@@ -1,0 +1,63 @@
+<!-- STAFF VIEW REPORT ON TICKET SALES -->
+
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>View Reports</h1>
+
+    <!-- Filter Form -->
+    <h3>Filter Ticket Sales</h3>
+    <form method="POST" action="{{ url_for('view_reports') }}">
+        <label for="start_date">Start Date:</label>
+        <input type="date" name="start_date" value="{{ start_date or '' }}" required><br>
+
+        <label for="end_date">End Date:</label>
+        <input type="date" name="end_date" value="{{ end_date or '' }}" required><br>
+
+        <button type="submit">Filter Sales</button>
+    </form>
+
+    <!-- Total Sales Display -->
+    <h3>Total Tickets Sold: {{ total_sales }}</h3>
+
+    <!-- Month-Wise Sales Chart -->
+    <h3>Month-wise Ticket Sales</h3>
+    <canvas id="salesChart" width="400" height="200"></canvas>
+    
+    <script>
+        var ctx = document.getElementById('salesChart').getContext('2d');
+        var salesChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [
+                    {% for entry in month_wise_sales %}
+                        "{{ entry['month'] }}", {% if not loop.last %},{% endif %}
+                    {% endfor %}
+                ],
+                datasets: [{
+                    label: 'Tickets Sold',
+                    data: [
+                        {% for entry in month_wise_sales %}
+                            {{ entry['tickets_sold'] }},
+                            {% if not loop.last %},{% endif %}
+                        {% endfor %}
+                    ],
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                responsive: true
+            }
+        });
+    </script>
+    
+    <br>
+    <a href="{{ url_for('airline_staff_dashboard') }}">Back to Dashboard</a>
+{% endblock %}

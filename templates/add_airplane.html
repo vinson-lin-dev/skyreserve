@@ -1,0 +1,20 @@
+<!-- STAFF (ADMIN): ADD NEW AIRPLANE -->
+ 
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Add New Airplane</h1>
+
+    <form method="POST" action="{{ url_for('add_airplane') }}">
+        <label for="airplane_id">Airplane ID:</label>
+        <input type="text" name="airplane_id" required><br>
+
+        <label for="seats">Number of Seats:</label>
+        <input type="number" name="seats" required><br>
+
+        <button type="submit">Add Airplane</button>
+    </form>
+
+    <br>
+    <a href="{{ url_for('airline_staff_dashboard') }}">Back to Dashboard</a>
+{% endblock %}

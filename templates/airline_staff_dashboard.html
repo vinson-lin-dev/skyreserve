@@ -1,0 +1,140 @@
+<!-- BOOKING AGENT DASHBOARD -->
+
+{% extends "base.html" %}
+
+{% block content %}
+    <div>
+        <div class="staff-buttons">
+            <h1>Airline Staff Dashboard</h1>
+            <h3>Welcome back {{ session['user_email'] }}!</h3> 
+
+            {% if session['role'] == 'airline_staff' %}
+                <a>All Staff Views</a>
+                <a href="{{ url_for('view_booking_agents') }}">
+                    <button class="btn">Booking Agents</button>
+                </a>   
+                <a href="{{ url_for('view_frequent_customers') }}">
+                    <button class="btn">Frequent Fliers</button>
+                </a>
+                <a href="{{ url_for('view_reports') }}">
+                    <button class="btn">Sales Report</button>
+                </a>
+                <a href="{{ url_for('view_revenue_comparison') }}">
+                    <button class="btn">Revenue Comparison</button>
+                </a>
+                <a href="{{ url_for('view_top_destinations') }}">
+                    <button class="btn">Top Destinations</button>
+                </a>
+            {% endif %}
+            <br>
+            {% if session['role'] == 'airline_staff' and check_admin_permissions(session['user_email']) %}
+                <a>Admin Actions</a>
+                <a href="{{ url_for('grant_permissions') }}">
+                    <button class="btn">Grant Permissions</button>
+                </a>
+                <a href="{{ url_for('add_booking_agent') }}">
+                    <button class="btn">Add Booking Agent</button>
+                </a>
+                <a href="{{ url_for('create_flight') }}">
+                    <button class="btn">Create New Flight</button>
+                </a>
+                <a href="{{ url_for('add_airplane') }}">
+                    <button class="btn">Add New Airplane</button>
+                </a>
+                <a href="{{ url_for('airplane_list') }}">
+                    <button class="btn">View Airplanes</button>
+                </a>
+                <a href="{{ url_for('add_airport') }}">
+                    <button class="btn">Add New Airport</button>
+                </a>
+                <a href="{{ url_for('airport_list') }}">
+                    <button class="btn">View Airports</button>
+                </a>                
+            {% endif %}
+        </div>
+
+        <!-- Filter Form -->
+        <h2>Filter Flights</h2>
+        <form method="POST" action="{{ url_for('airline_staff_dashboard') }}">
+            <label for="start_date">Start Date:</label>
+            <input type="date" name="start_date" value="{{ start_date }}" required><br>
+
+            <label for="end_date">End Date:</label>
+            <input type="date" name="end_date" value="{{ end_date }}" required><br>
+
+            <label for="source_airport">Source Airport:</label>
+            <input type="text" name="source_airport" placeholder="Source Airport" value="{{ source_airport }}" required><br>
+
+            <label for="destination_airport">Destination Airport:</label>
+            <input type="text" name="destination_airport" placeholder="Destination Airport" value="{{ destination_airport }}" required><br>
+
+            <button type="submit">Filter Flights</button>
+        </form>
+
+        <br>
+
+        <!-- Flights Table -->
+        <h2>Upcoming Flights</h2>
+        {% if flights %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Flight Number</th>
+                        <th>Departure Time</th>
+                        <th>Arrival Time</th>
+                        <th>Departure Airport</th>
+                        <th>Arrival Airport</th>
+                        <th>Number of Customers</th>
+                        <th>View Customers</th>
+                        {% if session['role'] == 'airline_staff' and check_operator_permission(session['user_email']) %}
+                            <th>Change Status</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for flight in flights %}
+                        <tr>
+                            <td>{{ flight.flight_num }}</td>
+                            <td>{{ flight.departure_time }}</td>
+                            <td>{{ flight.arrival_time }}</td>
+                            <td>{{ flight.departure_airport }}</td>
+                            <td>{{ flight.arrival_airport }}</td>
+                            <td>{{ flight.num_customers }}</td>
+                            <td>
+                                <button onclick="toggleCustomers('{{ flight.flight_num }}')">View Customers</button>
+                                <div id="customers_{{ flight.flight_num }}" style="display:none;">
+                                    <ul>
+                                        {% for customer in flight_customers[flight.flight_num] %}
+                                            <li>{{ customer.name }} ({{ customer.email }})</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </td>
+                            {% if session['role'] == 'airline_staff' and check_operator_permission(session['user_email']) %}
+                                <td>
+                                    <a href="{{ url_for('change_flight_status', airline_name=flight['airline_name'], flight_num=flight['flight_num']) }}">
+                                        <button class="btn">Change Status</button>
+                                    </a>
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No upcoming flights found.</p>
+        {% endif %}
+    </div>
+
+    <script>
+        // Function to toggle the visibility of customers for a flight
+        function toggleCustomers(flight_num) {
+            var customersDiv = document.getElementById("customers_" + flight_num);
+            if (customersDiv.style.display === "none") {
+                customersDiv.style.display = "block";
+            } else {
+                customersDiv.style.display = "none";
+            }
+        }
+    </script>
+{% endblock %}
