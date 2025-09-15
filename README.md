@@ -35,7 +35,7 @@ Demo Login on [Render](https://skyreserve-oepk.onrender.com/) (may take up to 30
 - Purchase tickets on behalf of customers for their affiliated airline.
 - View upcoming flights purchased for customers.
 - Track commission earned from sales.
-![Booking Agent Page](docs/image/skyreserve-booking.png)
+![Booking Agent Page](docs/images/skyreserve-booking.png)
 
 ### Airline Admin / Staff
 - Add and manage flights, airplanes, and airports.
